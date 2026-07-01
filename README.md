@@ -46,3 +46,12 @@ Sau direct:
 Scriptul foloseste `python-oracledb`. Daca Oracle Client nu este instalat,
 modul thin al librariei ar trebui sa fie suficient pentru conexiunea simpla cu
 host/port/SID.
+
+## Acces pentru toti utilizatorii
+
+Pentru ca folderul exportului si fisierele generate ulterior sa fie accesibile
+tuturor utilizatorilor Windows, ruleaza:
+
+```powershell
+.\set_access_everyone.ps1
+```
