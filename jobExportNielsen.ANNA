@@ -1,0 +1,12 @@
+Oracle_Server=10.9.118.15
+Oracle_Port=1521
+Oracle_Username=whdb_annabella
+Oracle_Password=whdb_annabella
+Oracle_Sid=whdb
+p_id_societate=1
+p_soc_name=ANNABELLA_SRL
+p_sapt=
+p_id_gestiune_start=1
+p_id_gestiune_final=999
+p_data_start=
+p_data_final=

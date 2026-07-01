@@ -1,0 +1,12 @@
+Oracle_Server=10.9.124.11
+Oracle_Port=1521
+Oracle_Password=sirius_multisoc2
+Oracle_Username=sirius_multisoc2
+Oracle_Sid=wldb
+p_id_societate=8
+p_soc_name=COMIND
+p_sapt= 
+p_id_gestiune_start=1
+p_id_gestiune_final=999
+p_data_start= 
+p_data_final= 

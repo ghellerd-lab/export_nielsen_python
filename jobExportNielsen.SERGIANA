@@ -1,0 +1,12 @@
+Oracle_Server=10.9.112.11
+Oracle_Port=1521
+Oracle_Username=sirius_sergiana
+Oracle_Password=sirius_sergiana
+Oracle_Sid=wldb
+p_id_societate=9
+p_soc_name=SERGIANA_RETAIL_SRL
+p_sapt=15
+p_id_gestiune_start=1
+p_id_gestiune_final=999
+p_data_start=20250407
+p_data_final=20250413

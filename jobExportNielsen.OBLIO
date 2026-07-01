@@ -1,0 +1,12 @@
+Oracle_Server=10.9.114.21
+Oracle_Port=1521
+Oracle_Password=sirius_multiprod
+Oracle_Username=sirius_multiprod
+Oracle_Sid=wldb
+p_id_societate=5
+p_soc_name=OBLIO_COM_SRL
+p_sapt=
+p_id_gestiune_start=1
+p_id_gestiune_final=999
+p_data_start=
+p_data_final=
