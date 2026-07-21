@@ -29,6 +29,13 @@ Parametrul optional `last_month` se adauga in fisierul `jobExportNielsen.propert
 last_month=y
 ```
 
+Jobul programat lunar (`systemd`, prin optiunea `--monthly`) executa exportul
+numai daca valoarea este `last_month=y`. Daca parametrul lipseste, este gol sau
+are orice alta valoare, rularea lunara este sarita: nu exista conexiune Oracle,
+nu se genereaza ZIP-uri, se scrie motivul in log si procesul iese cu codul `0`.
+Aceasta conditie se aplica jobului lunar; rularea manuala fara `--monthly`
+continua sa respecte regulile normale de perioada descrise mai jos.
+
 Valoarea `y` (fara diferenta intre litere mari si mici si cu spatii permise in
 jurul valorii) ignora `p_sapt`, `p_data_start` si `p_data_final` si genereaza
 cate un ZIP pentru fiecare saptamana care intersecteaza luna calendaristica
@@ -107,6 +114,10 @@ EXPORT_NIELSEN_LOG_DIR=/cale/loguri
 Pentru programarea in prima luni a lunii sunt incluse
 `export-nielsen.service` si `export-nielsen.timer`. Exemplul presupune instalarea
 kitului in `/opt/export_nielsen` si un cont Linux dedicat `exportnielsen`.
+Serviciul apeleaza runnerul cu `--monthly`. In acest mod exportul porneste numai
+daca parametrul din configuratie este `last_month=y`. Pentru orice alta valoare,
+runnerul scrie in log `Rulare lunara sarita`, nu se conecteaza la Oracle, nu
+creeaza ZIP-uri si se incheie cu exit code `0`.
 Administratorul creeaza in prealabil directoarele `output/` si `logs/`, le acorda
 contului jobului si instaleaza unitatile:
 

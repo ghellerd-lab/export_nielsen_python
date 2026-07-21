@@ -17,6 +17,7 @@ p_id_gestiune_start=1
 p_id_gestiune_final=999
 p_data_start= 
 p_data_final= 
+# Jobul systemd lunar ruleaza numai pentru y; orice alta valoare il sare fara Oracle si fara ZIP-uri
 # y = genereaza mai multe ZIP-uri pentru luna precedenta si ignora perioada configurata
 last_month=n
 # y = include si fisierul ARTICOLE in fiecare ZIP
