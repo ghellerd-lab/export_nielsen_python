@@ -3,6 +3,9 @@ Oracle_Port=1521
 Oracle_Username=sirius_sergiana
 Oracle_Password=sirius_sergiana
 Oracle_Sid=wldb
+# Timeout conectare Oracle (secunde) si timeout maxim pentru un apel Oracle (secunde)
+oracle_connect_timeout=30
+oracle_call_timeout=1800
 p_id_societate=9
 p_soc_name=SERGIANA_RETAIL_SRL
 p_sapt=15
@@ -12,3 +15,5 @@ p_data_start=20250407
 p_data_final=20250413
 # y = genereaza ZIP-uri pentru toate saptamanile L-D care intersecteaza luna precedenta; orice alta valoare pastreaza functionalitatea curenta
 last_month=n
+# y = include si fisierul ARTICOLE in fiecare ZIP
+articole=y

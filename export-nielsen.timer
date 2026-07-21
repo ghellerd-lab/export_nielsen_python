@@ -1,0 +1,10 @@
+[Unit]
+Description=Ruleaza exportul Nielsen in prima luni din fiecare luna
+
+[Timer]
+OnCalendar=Mon *-*-01..07 03:00:00
+Persistent=true
+Unit=export-nielsen.service
+
+[Install]
+WantedBy=timers.target

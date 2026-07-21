@@ -3,6 +3,9 @@ Oracle_Port=1521
 Oracle_Password=sirius_multisoc2
 Oracle_Username=sirius_multisoc2
 Oracle_Sid=wldb
+# Timeout conectare Oracle (secunde) si timeout maxim pentru un apel Oracle (secunde)
+oracle_connect_timeout=30
+oracle_call_timeout=1800
 p_id_societate=8
 p_soc_name=COMIND
 p_sapt= 
@@ -12,3 +15,5 @@ p_data_start=
 p_data_final= 
 # y = genereaza ZIP-uri pentru toate saptamanile L-D care intersecteaza luna precedenta; orice alta valoare pastreaza functionalitatea curenta
 last_month=n
+# y = include si fisierul ARTICOLE in fiecare ZIP
+articole=y

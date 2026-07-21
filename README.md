@@ -16,6 +16,11 @@ stau in folderul acestui script: `D:\Apps\SiriusWHOAS\export_nielsen_python`.
    `PKG_EXPORTURI_NIELSEN.vanzari_magazine_perioada`.
 6. Arhiveaza fisierele generate in `<societate>_<perioada>.zip`.
 
+Fisierele CSV sunt generate intr-un director temporar unic, care este sters
+automat atat dupa succes, cat si dupa eroare. Astfel, o reluare nu poate include
+fisiere ramase de la o executie esuata. Aplicatia blocheaza si doua rulari
+simultane in acelasi folder de export.
+
 ## Exportul lunii precedente
 
 Parametrul optional `last_month` se adauga in fisierul `jobExportNielsen.properties`:
@@ -39,6 +44,21 @@ functionalitatea ramane cea curenta: se genereaza un singur ZIP folosind
 `p_sapt`, `p_data_start` si `p_data_final` din configuratie sau valorile lor
 implicite existente.
 
+## Parametri operationali
+
+```properties
+# Timeout conectare Oracle, in secunde
+oracle_connect_timeout=30
+# Timeout maxim pentru fiecare apel Oracle, in secunde
+oracle_call_timeout=1800
+# Include fisierul ARTICOLE in fiecare ZIP
+articole=y
+```
+
+`articole=y` este trecut explicit in toate configuratiile livrate. Orice alta
+valoare dezactiveaza exportul ARTICOLE. Un export care nu produce niciun fisier
+este tratat ca eroare si nu este raportat ca succes.
+
 CSV-urile sunt scrise ca in Talend: o singura coloana `LINIE` pe rand, encoding
 `ISO-8859-15`, fara header.
 
@@ -50,9 +70,66 @@ pip install -r .\requirements.txt
 
 ## Rulare
 
+### Linux (productie)
+
+Kitul Linux nu necesita Python instalat. Din folderul dezarhivat:
+
+```bash
+chmod +x run_export_nielsen_linux.sh export_nielsen/export_nielsen
+./run_export_nielsen_linux.sh
+```
+
+Runnerul nu recalculeaza si nu rescrie perioada din configuratie. Pentru
+`last_month=y`, aplicatia genereaza toate ZIP-urile lunii precedente. Outputul
+este salvat implicit in `output/`, iar singura semnalare operationala este
+logul `logs/export_nielsen_<AAAALL>.log` plus codul de iesire al procesului.
+Nu este configurata nicio alerta Windows sau Linux.
+
+Variabile optionale:
+
+```bash
+EXPORT_NIELSEN_OUTPUT_DIR=/cale/output
+EXPORT_NIELSEN_LOG_DIR=/cale/loguri
+```
+
+Pentru programarea in prima luni a lunii sunt incluse
+`export-nielsen.service` si `export-nielsen.timer`. Exemplul presupune instalarea
+kitului in `/opt/export_nielsen` si un cont Linux dedicat `exportnielsen`.
+Administratorul creeaza in prealabil directoarele `output/` si `logs/`, le acorda
+contului jobului si instaleaza unitatile:
+
+```bash
+sudo install -m 0644 export-nielsen.service /etc/systemd/system/
+sudo install -m 0644 export-nielsen.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now export-nielsen.timer
+systemctl list-timers export-nielsen.timer
+```
+
+Nu exista unitate `OnFailure`; rezultatul se verifica in logul local sau cu
+`journalctl -u export-nielsen.service`.
+
+### Windows / dezvoltare
+
 ```powershell
 .\run_export_nielsen.ps1
 ```
+
+Scriptul foloseste executabilul portabil daca acesta exista langa script; in
+mediul de dezvoltare foloseste Python. Outputul este afisat pe ecran si adaugat
+in `logs\export_nielsen_<AAAALL>.log`, iar codul de iesire este propagat catre
+Task Scheduler.
+
+Daca runnerul Windows este folosit si exportul intoarce un cod diferit de zero, acesta:
+
+- scrie detaliul in `logs\export_nielsen_ALERTE.log`;
+- incearca sa creeze un eveniment `ERROR`, sursa `ExportNielsen`, ID `100`, in
+  jurnalul Windows `Application`;
+- pastreaza acelasi cod de eroare pentru istoricul Task Scheduler.
+
+Evenimentul poate fi monitorizat de sistemul de alertare al companiei. Crearea
+evenimentului necesita ca taskul sa aiba dreptul de a scrie in Event Log;
+fisierul de alerte este produs indiferent daca Event Log refuza operatia.
 
 Sau din CMD / dublu-click:
 
@@ -70,11 +147,40 @@ Scriptul foloseste `python-oracledb`. Daca Oracle Client nu este instalat,
 modul thin al librariei ar trebui sa fie suficient pentru conexiunea simpla cu
 host/port/SID.
 
-## Acces pentru toti utilizatorii
+## Programare lunara in productie
 
-Pentru ca folderul exportului si fisierele generate ulterior sa fie accesibile
-tuturor utilizatorilor Windows, ruleaza:
+Inainte de instalare seteaza `last_month=y`, apoi deschide PowerShell ca
+Administrator si ruleaza:
 
 ```powershell
-.\set_access_everyone.ps1
+.\install_monthly_task.ps1 -Time "03:00"
 ```
+
+Taskul ruleaza in prima luni din fiecare luna, implicit sub contul `SYSTEM`.
+Pentru alt cont foloseste `-RunAs "DOMENIU\cont_job"`. Daca trimiterea se face
+prin Outlook local, taskul trebuie rulat sub un cont dedicat care are profil
+Outlook; pentru `SYSTEM` se recomanda SMTP.
+
+## Drepturi de acces
+
+Nu se acorda acces grupului `Everyone`. Pentru a permite modificarea numai
+contului jobului, administratorilor locali si contului `SYSTEM`, deschide
+PowerShell ca Administrator si ruleaza:
+
+```powershell
+.\set_access_everyone.ps1 -JobAccount "DOMENIU\cont_job"
+```
+
+Numele scriptului este pastrat pentru compatibilitate, dar comportamentul vechi
+care acorda acces tuturor a fost eliminat. Configuratia contine parola Oracle si
+trebuie protejata prin aceste drepturi.
+
+## Structura codului
+
+- `export_nielsen.py` orchestreaza rularea si ramane punctul unic de pornire;
+- `nielsen_config.py` contine configuratia si calculul perioadelor;
+- `nielsen_oracle.py` contine conexiunea si exporturile Oracle/CSV;
+- `nielsen_files.py` contine blocarea, logul si arhivarea;
+- `nielsen_email.py` contine metodele Outlook si SMTP.
+
+Separarea nu schimba argumentele liniei de comanda sau modul de instalare.

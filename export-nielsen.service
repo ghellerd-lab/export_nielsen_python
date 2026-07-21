@@ -1,0 +1,16 @@
+[Unit]
+Description=Export Nielsen pentru luna precedenta
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=exportnielsen
+Group=exportnielsen
+WorkingDirectory=/opt/export_nielsen
+ExecStart=/opt/export_nielsen/run_export_nielsen_linux.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/export_nielsen/output /opt/export_nielsen/logs

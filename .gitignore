@@ -4,3 +4,6 @@ run_export_nielsen_output.log
 Log.csv
 *_sapt*/
 *_sapt*.zip
+.export_nielsen.lock
+logs/
+output/
