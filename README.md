@@ -98,6 +98,9 @@ chmod +x run_export_nielsen_linux.sh export_nielsen/export_nielsen
 ./run_export_nielsen_linux.sh
 ```
 
+Kitul include intotdeauna `ghid_utilizator.txt`, cu instructiunile scurte de
+instalare, configurare, rulare manuala si programare lunara.
+
 Runnerul nu recalculeaza si nu rescrie perioada din configuratie. Pentru
 `last_month=y`, aplicatia genereaza toate ZIP-urile lunii precedente. Outputul
 este salvat implicit in `output/`, iar singura semnalare operationala este

@@ -1,0 +1,115 @@
++GHID UTILIZATOR - EXPORT NIELSEN LINUX
+
+1. INSTALARE
+
+Dezarhivati kitul:
+
+  unzip export_nielsen_linux.zip
+  cd export_nielsen
+
+Kitul este portabil si nu necesita Python instalat. Executabilul si bibliotecile
+sale se afla in folderul export_nielsen/.
+
+Permisiuni recomandate:
+
+  chown -R exportnielsen:exportnielsen /opt/export_nielsen
+  find /opt/export_nielsen -type d -exec chmod 750 {} +
+  chmod 750 /opt/export_nielsen/run_export_nielsen_linux.sh
+  chmod 750 /opt/export_nielsen/export_nielsen/export_nielsen
+  chmod 600 /opt/export_nielsen/jobExportNielsen.properties
+  chmod 640 /opt/export_nielsen/ghid_utilizator.txt
+
+2. ORDINEA PARAMETRILOR DE PERIOADA
+
+A. last_month=y
+
+Aplicatia ignora p_sapt, p_data_start si p_data_final. Pentru luna calendaristica
+precedenta genereaza cate un ZIP pentru fiecare saptamana completa luni-duminica
+care intersecteaza luna. Prima si ultima saptamana pot contine zile din lunile
+vecine.
+
+B. last_month diferit de y si date valide
+
+Se foloseste intervalul p_data_start-p_data_final. Ambele date trebuie sa fie
+calendaristic valide, in format AAAALLZZ, iar data de inceput trebuie sa fie mai
+mica sau egala cu data finala.
+
+p_sapt trebuie sa fie intre 1 si 53. Daca lipseste sau este invalid, se
+calculeaza automat din p_data_start.
+
+C. last_month diferit de y si date lipsa/gresite
+
+Daca una dintre date lipseste, este invalida sau intervalul este inversat,
+aplicatia ignora perioada configurata si exporta saptamana precedenta completa,
+de luni pana duminica.
+
+3. RULARE MANUALA
+
+  ./run_export_nielsen_linux.sh
+
+Rularea manuala aplica toate regulile de perioada de mai sus.
+
+Outputul este creat implicit in output/, iar logul este scris in:
+
+  logs/export_nielsen_AAAALL.log
+
+Locatiile pot fi schimbate cu:
+
+  EXPORT_NIELSEN_OUTPUT_DIR=/cale/output
+  EXPORT_NIELSEN_LOG_DIR=/cale/loguri
+
+4. RULARE LUNARA SYSTEMD
+
+Serviciul programat apeleaza:
+
+  ./run_export_nielsen_linux.sh --monthly
+
+In acest mod exportul porneste numai daca last_month=y. Pentru orice alta
+valoare, parametrul gol sau absent:
+
+- nu se realizeaza conexiunea Oracle;
+- nu se genereaza ZIP-uri;
+- in log apare "Rulare lunara sarita: last_month nu este y";
+- procesul se incheie cu exit code 0.
+
+Timerul ruleaza in prima luni dintre zilele 1 si 7 ale fiecarei luni, la 03:00:
+
+  OnCalendar=Mon *-*-01..07 03:00:00
+
+Instalare:
+
+  sudo install -m 0644 export-nielsen.service /etc/systemd/system/
+  sudo install -m 0644 export-nielsen.timer /etc/systemd/system/
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now export-nielsen.timer
+
+Verificare:
+
+  systemctl list-timers export-nielsen.timer
+  systemctl status export-nielsen.service
+  journalctl -u export-nielsen.service
+
+5. CONFIGURARE ORACLE
+
+Completati in jobExportNielsen.properties serverul, portul, utilizatorul, parola,
+SID-ul, societatea si limitele gestiunilor. Protejati fisierul cu chmod 600.
+
+Timeouturile recomandate sunt:
+
+  oracle_connect_timeout=30
+  oracle_call_timeout=1800
+
+6. FISIERUL ARTICOLE
+
+  articole=y
+
+Valoarea y include fisierul ARTICOLE in fiecare ZIP. Orice alta valoare il
+dezactiveaza.
+
+7. VERIFICAREA EXECUTABILULUI
+
+  ./export_nielsen/export_nielsen --self-test-imports
+
+Comanda trebuie sa raporteze versiunile oracledb si cryptography si sa se
+incheie cu exit code 0.
+
