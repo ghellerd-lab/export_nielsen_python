@@ -8,12 +8,16 @@ oracle_connect_timeout=30
 oracle_call_timeout=1800
 p_id_societate=1
 p_soc_name=ANNABELLA_SRL
+# p_data_start si p_data_final folosesc formatul AAAALLZZ (exemplu: 20260701)
+# Daca ambele date sunt valide si p_data_start <= p_data_final, se foloseste intervalul configurat
+# Daca una dintre date lipseste, este invalida sau intervalul este inversat, se foloseste saptamana precedenta L-D
+# p_sapt trebuie sa fie intre 1 si 53; daca lipseste/este invalid, se calculeaza din p_data_start valid
 p_sapt=
 p_id_gestiune_start=1
 p_id_gestiune_final=999
 p_data_start=
 p_data_final=
-# y = genereaza ZIP-uri pentru toate saptamanile L-D care intersecteaza luna precedenta; orice alta valoare pastreaza functionalitatea curenta
+# y = genereaza mai multe ZIP-uri pentru luna precedenta si ignora perioada configurata
 last_month=n
 # y = include si fisierul ARTICOLE in fiecare ZIP
 articole=y

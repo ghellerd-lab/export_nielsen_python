@@ -5,9 +5,28 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from export_nielsen import RunLock, archive_export, load_config, previous_month_week_params, run_period
+from nielsen_config import default_iso_week_params
 
 
 class PreviousMonthWeekParamsTests(unittest.TestCase):
+    @staticmethod
+    def write_config(root: Path, period: str) -> Path:
+        path = root / "jobExportNielsen.properties"
+        path.write_text(
+            """Oracle_Server=db
+Oracle_Port=1521
+Oracle_Username=user
+Oracle_Password=password
+Oracle_Sid=sid
+p_id_societate=1
+p_soc_name=TEST
+p_id_gestiune_start=1
+p_id_gestiune_final=999
+""" + period,
+            encoding="iso-8859-15",
+        )
+        return path
+
     def test_month_aligned_to_monday_and_extended_at_end(self):
         self.assertEqual(
             previous_month_week_params(date(2026, 7, 21)),
@@ -60,6 +79,56 @@ last_month=Y
             config = load_config(path)
 
         self.assertTrue(config.last_month_enabled)
+
+    def test_valid_manual_dates_are_preserved(self):
+        with TemporaryDirectory() as temp_dir:
+            path = self.write_config(
+                Path(temp_dir),
+                "p_sapt=15\np_data_start=20260406\np_data_final=20260412\nlast_month=n\n",
+            )
+            config = load_config(path)
+        self.assertEqual((config.p_sapt, config.p_data_start, config.p_data_final),
+                         (15, 20260406, 20260412))
+
+    def test_invalid_week_is_derived_from_valid_start_date(self):
+        with TemporaryDirectory() as temp_dir:
+            path = self.write_config(
+                Path(temp_dir),
+                "p_sapt=gresit\np_data_start=20260406\np_data_final=20260412\nlast_month=n\n",
+            )
+            config = load_config(path)
+        self.assertEqual((config.p_sapt, config.p_data_start, config.p_data_final),
+                         (15, 20260406, 20260412))
+
+    def test_invalid_manual_dates_fall_back_to_previous_week(self):
+        with TemporaryDirectory() as temp_dir:
+            path = self.write_config(
+                Path(temp_dir),
+                "p_sapt=99\np_data_start=20260230\np_data_final=gresit\nlast_month=n\n",
+            )
+            config = load_config(path)
+        expected = default_iso_week_params()
+        self.assertEqual((config.p_sapt, config.p_data_start, config.p_data_final), expected)
+
+    def test_missing_manual_date_falls_back_to_previous_week(self):
+        with TemporaryDirectory() as temp_dir:
+            path = self.write_config(
+                Path(temp_dir),
+                "p_sapt=15\np_data_start=\np_data_final=20260412\nlast_month=n\n",
+            )
+            config = load_config(path)
+        self.assertEqual((config.p_sapt, config.p_data_start, config.p_data_final),
+                         default_iso_week_params())
+
+    def test_reversed_manual_dates_fall_back_to_previous_week(self):
+        with TemporaryDirectory() as temp_dir:
+            path = self.write_config(
+                Path(temp_dir),
+                "p_sapt=15\np_data_start=20260412\np_data_final=20260406\nlast_month=n\n",
+            )
+            config = load_config(path)
+        expected = default_iso_week_params()
+        self.assertEqual((config.p_sapt, config.p_data_start, config.p_data_final), expected)
 
     def test_temporary_export_directory_is_removed_after_database_error(self):
         properties = """\

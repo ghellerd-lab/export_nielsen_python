@@ -149,6 +149,16 @@ def previous_month_week_params(today: date | datetime | None = None) -> list[tup
     return result
 
 
+def parse_yyyymmdd(value: str) -> date | None:
+    value = value.strip()
+    if len(value) != 8 or not value.isdigit():
+        return None
+    try:
+        return datetime.strptime(value, "%Y%m%d").date()
+    except ValueError:
+        return None
+
+
 def load_config(path: Path) -> Config:
     values = parse_properties(path)
     default_sapt, default_start, default_final = default_iso_week_params()
@@ -156,9 +166,19 @@ def load_config(path: Path) -> Config:
     if last_month.lower() == "y":
         p_sapt, p_data_start, p_data_final = default_sapt, default_start, default_final
     else:
-        p_sapt = optional_int(values, "p_sapt", default_sapt)
-        p_data_start = optional_int(values, "p_data_start", default_start)
-        p_data_final = optional_int(values, "p_data_final", default_final)
+        start_date = parse_yyyymmdd(values.get("p_data_start", ""))
+        final_date = parse_yyyymmdd(values.get("p_data_final", ""))
+        if start_date is None or final_date is None or start_date > final_date:
+            p_sapt, p_data_start, p_data_final = default_sapt, default_start, default_final
+        else:
+            p_data_start = int(start_date.strftime("%Y%m%d"))
+            p_data_final = int(final_date.strftime("%Y%m%d"))
+            configured_week = values.get("p_sapt", "").strip()
+            try:
+                parsed_week = int(configured_week)
+            except ValueError:
+                parsed_week = 0
+            p_sapt = parsed_week if 1 <= parsed_week <= 53 else start_date.isocalendar().week
 
     return Config(
         oracle_server=require_str(values, "Oracle_Server"),

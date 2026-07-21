@@ -39,10 +39,22 @@ Exemplu: la o rulare in iulie 2026 sunt exportate saptamanile `20260601-20260607
 `20260608-20260614`, `20260615-20260621`, `20260622-20260628` si
 `20260629-20260705`.
 
-Pentru orice alta valoare (inclusiv `n`, valoare goala sau parametrul absent),
-functionalitatea ramane cea curenta: se genereaza un singur ZIP folosind
-`p_sapt`, `p_data_start` si `p_data_final` din configuratie sau valorile lor
-implicite existente.
+Ordinea de evaluare a perioadei este:
+
+1. Daca `last_month=y`, valorile `p_sapt`, `p_data_start` si `p_data_final` sunt
+   ignorate si se genereaza cate un ZIP pentru fiecare saptamana L-D care
+   intersecteaza luna precedenta.
+2. Daca `last_month` are orice alta valoare si `p_data_start` plus
+   `p_data_final` sunt date calendaristice valide in format `AAAALLZZ`, cu data
+   de inceput mai mica sau egala cu data finala, se genereaza un singur ZIP
+   pentru intervalul configurat.
+3. Daca `last_month` nu este `y`, iar una dintre date lipseste, este invalida
+   sau intervalul este inversat, se ignora intreaga perioada configurata si se
+   exporta automat saptamana precedenta completa, de luni pana duminica.
+
+Pentru un interval configurat valid, `p_sapt` este folosit daca este un numar
+intre 1 si 53. Daca lipseste sau este invalid, numarul saptamanii ISO este
+calculat din `p_data_start`.
 
 ## Parametri operationali
 
