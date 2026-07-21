@@ -10,3 +10,5 @@ p_id_gestiune_start=1
 p_id_gestiune_final=999
 p_data_start=20250407
 p_data_final=20250413
+# y = genereaza ZIP-uri pentru toate saptamanile L-D care intersecteaza luna precedenta; orice alta valoare pastreaza functionalitatea curenta
+last_month=n

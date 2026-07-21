@@ -16,6 +16,29 @@ stau in folderul acestui script: `D:\Apps\SiriusWHOAS\export_nielsen_python`.
    `PKG_EXPORTURI_NIELSEN.vanzari_magazine_perioada`.
 6. Arhiveaza fisierele generate in `<societate>_<perioada>.zip`.
 
+## Exportul lunii precedente
+
+Parametrul optional `last_month` se adauga in fisierul `jobExportNielsen.properties`:
+
+```properties
+last_month=y
+```
+
+Valoarea `y` (fara diferenta intre litere mari si mici si cu spatii permise in
+jurul valorii) ignora `p_sapt`, `p_data_start` si `p_data_final` si genereaza
+cate un ZIP pentru fiecare saptamana care intersecteaza luna calendaristica
+precedenta. Fiecare perioada este o saptamana completa, de luni pana duminica;
+de aceea prima si ultima perioada pot cuprinde zile din lunile vecine.
+
+Exemplu: la o rulare in iulie 2026 sunt exportate saptamanile `20260601-20260607`,
+`20260608-20260614`, `20260615-20260621`, `20260622-20260628` si
+`20260629-20260705`.
+
+Pentru orice alta valoare (inclusiv `n`, valoare goala sau parametrul absent),
+functionalitatea ramane cea curenta: se genereaza un singur ZIP folosind
+`p_sapt`, `p_data_start` si `p_data_final` din configuratie sau valorile lor
+implicite existente.
+
 CSV-urile sunt scrise ca in Talend: o singura coloana `LINIE` pe rand, encoding
 `ISO-8859-15`, fara header.
 
